@@ -1,0 +1,106 @@
+.setcallreg r29.w0
+.origin 0
+.entrypoint START
+
+#define PRU0_PRU1_INTERRUPT 17
+#define PRU1_PRU0_INTERRUPT 18
+#define PRU0_ARM_INTERRUPT  19
+#define PRU1_ARM_INTERRUPT  20
+#define ARM_PRU0_INTERRUPT  21
+#define ARM_PRU1_INTERRUPT  22
+
+#define CTBIR    0x22020
+#define CTPPR_0  0x22028
+#define CTPPR_1  0x2202C
+
+#define CONST_PRUCFG        C4
+#define CONST_PRUDRAM       C24
+#define CONST_PRUSHAREDRAM  C28
+#define CONST_DDR           C31
+
+#define PIN_15   15
+#define PIN_14   14
+#define PIN_5    5
+#define PIN_2    2
+
+START:
+
+LBCO    r0, CONST_PRUCFG, 4, 4
+CLR r0, r0, 4
+SBCO    r0, CONST_PRUCFG, 4, 4
+
+MOV     r0, 0x00000120
+MOV     r1, CTPPR_0
+SBBO    r0, r1, 0, 4
+
+
+MAINLOOP:
+
+ZERO 4, 16
+LBCO r4, CONST_PRUSHAREDRAM, 0, 16
+
+QBEQ EXIT, r4, 255
+
+QBEQ OFF1, r4, 11
+Return_OFF1:
+
+QBEQ OFF2, r5, 22
+Return_OFF2:
+
+QBEQ OFF3, r6, 33
+Return_OFF3:
+
+QBEQ OFF4, r7, 44
+Return_OFF4:
+
+QBEQ ON1, r4, 1
+Return_ON1:
+
+QBEQ ON2, r5, 2
+Return_ON2:
+
+QBEQ ON3, r6, 3
+Return_ON3:
+
+QBEQ ON4, r7, 4
+Return_ON4:
+
+JMP MAINLOOP
+
+
+OFF1:
+CLR r30, PIN_15
+JMP Return_OFF1
+
+OFF2:
+CLR r30, PIN_14
+JMP Return_OFF2
+
+OFF3:
+CLR r30, PIN_5
+JMP Return_OFF3
+
+OFF4:
+CLR r30, PIN_2
+JMP Return_OFF4
+
+ON1:
+SET r30, PIN_15
+JMP Return_ON1
+
+ON2:
+SET r30, PIN_14
+JMP Return_ON2
+
+ON3:
+SET r30, PIN_5
+JMP Return_ON3
+
+ON4:
+SET r30, PIN_2
+JMP Return_ON4
+
+
+EXIT:
+MOV R31.b0, PRU0_ARM_INTERRUPT+16
+HALT

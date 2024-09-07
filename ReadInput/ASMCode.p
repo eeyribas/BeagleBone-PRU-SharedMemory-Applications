@@ -1,0 +1,45 @@
+.origin 0
+.entrypoint START
+
+#define PRU0_PRU1_INTERRUPT 17
+#define PRU1_PRU0_INTERRUPT 18
+#define PRU0_ARM_INTERRUPT  19
+#define PRU1_ARM_INTERRUPT  20
+#define ARM_PRU0_INTERRUPT  21
+#define ARM_PRU1_INTERRUPT  22
+
+#define CTBIR    0x22020
+#define CTPPR_0  0x22028
+#define CTPPR_1  0x2202C
+
+#define CONST_PRUCFG        C4
+#define CONST_PRUDRAM       C24
+#define CONST_PRUSHAREDRAM  C28
+#define CONST_DDR           C31
+
+#define COUNT 10000
+#define VALUE 16
+#define PIN_15 15
+
+START:
+
+LBCO    r0, CONST_PRUCFG, 4, 4
+CLR 	r0, r0, 4
+SBCO    r0, CONST_PRUCFG, 4, 4
+MOV     r0, 0x00000120
+MOV     r1, CTPPR_0
+SBBO    r0, r1, 0, 4
+MOV     r2, COUNT
+
+
+MAINLOOP:
+
+MOV  R31.b0, 19 + 16
+SBCO R31.b0, CONST_PRUSHAREDRAM, 0, 16
+SUB  r2, r2, 1
+QBNE MAINLOOP, r2, 0
+
+MOV  r3, VALUE
+SBCO r3, CONST_PRUSHAREDRAM, 0, 16
+
+HALT
